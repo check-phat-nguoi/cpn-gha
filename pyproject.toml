@@ -1,10 +1,6 @@
 [project]
 name = "cpn-gha"
 version = "0.1.0"
-description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["cpn-cli>=0.1.0.dev1"]
-
-[tool.uv.sources]
-cpn-cli = { git = "https://github.com/check-phat-nguoi/cpn-cli/" }
+dependencies = ["cpn-cli==0.2.0"]
