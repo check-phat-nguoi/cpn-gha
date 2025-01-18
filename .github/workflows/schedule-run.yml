@@ -1,0 +1,54 @@
+name: Schedule Run
+
+on:
+  # schedule:
+  #   - cron: 0 0 * * 0
+  workflow_dispatch:
+
+env:
+  APT_PKGS_PATH: '${{ github.workspace }}/apt_pkgs.txt'
+
+jobs:
+  run:
+    name: Run
+    runs-on: ubuntu-latest
+    env:
+      config: ${{ secrets.config }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore config
+        if: ${{ env.config != '' }}
+        run: curl -o config.json ${{ env.config }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: 'pyproject.toml'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: '.python-version'
+          cache: 'pip'
+          cache-dependency-path: 'pyproject.toml'
+
+      - name: Get required apt packages
+        id: get-pkgs
+        shell: bash
+        run: echo "pkgs=$( tr '\n' ' ' <'${{ env.APT_PKGS_PATH }}' )" > "$GITHUB_OUTPUT"
+
+      - uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: ${{ steps.get-pkgs.outputs.pkgs }}
+          version: ${{ hashFiles(env.APT_PKGS_PATH) }}
+          execute_install_scripts: true
+
+      - uses: extractions/setup-just@v2
+
+      - name: Install deps
+        run: just restore-env
+
+      - name: Run cpn-cli
+        run: just
