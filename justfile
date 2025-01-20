@@ -1,7 +1,7 @@
 default: run
   
 restore-env:
-  [ -d '.venv' ] || uv sync --no-dev --frozen
+  [ -d '.venv' ] || uv sync
 
 run:
-  uv run --frozen cpn-cli
+  uv run cpn-cli
